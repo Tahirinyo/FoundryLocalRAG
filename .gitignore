@@ -1,0 +1,42 @@
+# Python bytecode and local tooling caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Logs, temporary files, and local runtime output
+*.log
+*.tmp
+*.temp
+tmp/
+.tmp/
+temp/
+
+# Generated local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Private or local knowledge-base source documents
+data/private/
+data/local/
+sources/private/
+sources/local/
+
+# Local model assets and caches
+.cache/
+model-cache/
+models/
+*.gguf
+*.safetensors
+*.onnx
+*.bin
