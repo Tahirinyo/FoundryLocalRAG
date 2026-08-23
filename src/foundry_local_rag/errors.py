@@ -15,3 +15,7 @@ class DocumentError(ApplicationError):
 
 class PersistenceError(ApplicationError):
     """Raised when local persistence cannot safely complete."""
+
+
+class EmbeddingError(ApplicationError):
+    """Raised when local embedding generation cannot safely complete."""

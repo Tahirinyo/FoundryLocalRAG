@@ -7,7 +7,7 @@ name = "foundry-local-rag"
 version = "0.1.0"
 description = "A small local document question-and-answer assistant."
 requires-python = ">=3.11,<3.14"
-dependencies = []
+dependencies = ["foundry-local-sdk-winml==1.2.4"]
 
 [project.scripts]
 foundry-local-rag = "foundry_local_rag.cli:main"
