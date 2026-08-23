@@ -7,3 +7,7 @@ class ApplicationError(Exception):
 
 class ConfigurationError(ApplicationError):
     """Raised when application configuration is missing or invalid."""
+
+
+class DocumentError(ApplicationError):
+    """Raised when a supported document cannot be read or processed."""
