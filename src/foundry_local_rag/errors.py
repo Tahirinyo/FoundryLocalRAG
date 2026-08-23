@@ -19,3 +19,7 @@ class PersistenceError(ApplicationError):
 
 class EmbeddingError(ApplicationError):
     """Raised when local embedding generation cannot safely complete."""
+
+
+class RetrievalError(ApplicationError):
+    """Raised when persisted embeddings cannot be safely compared."""
