@@ -4,6 +4,7 @@
 
 - T00 — Repository and project-source setup.
 - T01 — Python and Foundry Local runtime compatibility research.
+- T02 — Application skeleton, configuration, and error contract.
 
 ## In Progress
 
@@ -15,4 +16,4 @@
 
 ## Next
 
-- T02 — Application skeleton, config, and error contract.
+- T03 — Next approved implementation task, to be specified.
