@@ -14,6 +14,8 @@
 - T08 — Grounded prompt construction and insufficient-context handling.
 - T09 — Foundry Local chat-model adapter.
 
+- T10 — End-to-end RAG answer orchestration.
+
 ## In Progress
 
 - None.
@@ -24,4 +26,4 @@
 
 ## Next
 
-- T10 — End-to-end RAG answer orchestration.
+- T11 — CLI question-and-answer flow.
