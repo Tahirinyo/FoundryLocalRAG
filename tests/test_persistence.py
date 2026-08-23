@@ -11,6 +11,7 @@ from foundry_local_rag.persistence import (
     PersistedChunk,
     initialize_database,
     load_chunks,
+    replace_source_chunks,
     store_chunks,
 )
 
@@ -97,6 +98,51 @@ class PersistenceTests(unittest.TestCase):
             with self.assertRaises(PersistenceError):
                 store_chunks(database_path, (record, record))
             self.assertEqual(load_chunks(database_path), ())
+
+    def test_replace_source_chunks_rejects_records_for_another_source(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            database_path = Path(temporary_directory) / "chunks.sqlite3"
+            initialize_database(database_path)
+
+            with self.assertRaisesRegex(PersistenceError, "belong to the replacement source"):
+                replace_source_chunks(
+                    database_path,
+                    "source-a",
+                    (PersistedChunk("source-b", 0, "text", (1.0,)),),
+                )
+
+            self.assertEqual(load_chunks(database_path), ())
+
+    def test_replace_source_chunks_is_atomic_and_preserves_other_sources(self) -> None:
+        old_source = PersistedChunk("source-a", 0, "old", (1.0,))
+        other_source = PersistedChunk("source-b", 0, "other", (2.0,))
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            database_path = Path(temporary_directory) / "chunks.sqlite3"
+            initialize_database(database_path)
+            store_chunks(database_path, (old_source, other_source))
+
+            with closing(sqlite3.connect(database_path)) as connection:
+                with connection:
+                    connection.execute(
+                        """
+                        CREATE TRIGGER fail_source_a_insert
+                        BEFORE INSERT ON chunks
+                        WHEN NEW.source_id = 'source-a'
+                        BEGIN
+                            SELECT RAISE(ABORT, 'forced failure');
+                        END
+                        """
+                    )
+
+            with self.assertRaises(PersistenceError):
+                replace_source_chunks(
+                    database_path,
+                    "source-a",
+                    (PersistedChunk("source-a", 0, "new", (3.0,)),),
+                )
+
+            self.assertEqual(load_chunks(database_path), (old_source, other_source))
 
     def test_rejects_invalid_embedding_values(self) -> None:
         invalid_embeddings = (

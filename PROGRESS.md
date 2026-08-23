@@ -8,6 +8,7 @@
 - T03 — Deterministic `.txt` reading and paragraph-based chunking.
 - T04 — SQLite schema and embedding persistence.
 - T05 — Foundry Local embedding adapter.
+- T06 — Ingestion pipeline.
 
 ## In Progress
 
@@ -19,4 +20,4 @@
 
 ## Next
 
-- T06 — Ingestion pipeline.
+- T07 — Retrieval and similarity.

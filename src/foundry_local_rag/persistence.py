@@ -34,6 +34,8 @@ INSERT INTO chunks (
 ) VALUES (?, ?, ?, ?, ?)
 """
 
+_DELETE_SOURCE_CHUNKS = "DELETE FROM chunks WHERE source_id = ?"
+
 _SELECT_CHUNKS = """
 SELECT source_id, chunk_index, chunk_text, embedding_json, embedding_dimension
 FROM chunks
@@ -75,6 +77,31 @@ def store_chunks(database_path: Path, chunks: Iterable[PersistedChunk]) -> None:
                 connection.executemany(_INSERT_CHUNK, rows)
     except sqlite3.Error as error:
         raise PersistenceError("Unable to store chunk records") from error
+
+
+def replace_source_chunks(
+    database_path: Path,
+    source_id: str,
+    chunks: Iterable[PersistedChunk],
+) -> None:
+    """Atomically replace every persisted chunk for one source."""
+
+    if not isinstance(source_id, str) or not source_id.strip():
+        raise PersistenceError("Replacement source_id must be a non-empty string")
+
+    records = tuple(chunks)
+    if any(chunk.source_id != source_id for chunk in records):
+        raise PersistenceError("Replacement chunks must belong to the replacement source")
+    rows = tuple(_record_to_row(chunk) for chunk in records)
+
+    connection = _connect_existing_database(database_path)
+    try:
+        with closing(connection):
+            with connection:
+                connection.execute(_DELETE_SOURCE_CHUNKS, (source_id,))
+                connection.executemany(_INSERT_CHUNK, rows)
+    except sqlite3.Error as error:
+        raise PersistenceError("Unable to replace source chunk records") from error
 
 
 def load_chunks(database_path: Path) -> tuple[PersistedChunk, ...]:
