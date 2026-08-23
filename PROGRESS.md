@@ -15,6 +15,7 @@
 - T09 — Foundry Local chat-model adapter.
 
 - T10 — End-to-end RAG answer orchestration.
+- T11 — Minimal CLI user experience.
 
 ## In Progress
 
@@ -22,8 +23,11 @@
 
 ## Blocked
 
-- None.
+- The validated Python 3.11 launcher could not start during T11 verification
+  because access to the WindowsApps interpreter was denied. The focused and
+  full test suites passed with the available Python 3.14.2 interpreter; this
+  does not establish Python 3.14 or offline Foundry Local runtime support.
 
 ## Next
 
-- T11 — CLI question-and-answer flow.
+- None.
