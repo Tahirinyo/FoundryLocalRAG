@@ -11,6 +11,7 @@
 - T06 — Ingestion pipeline.
 
 - T07 — Retrieval and similarity.
+- T08 — Grounded prompt construction and insufficient-context handling.
 
 ## In Progress
 
@@ -22,4 +23,4 @@
 
 ## Next
 
-- T08 — Grounded prompt construction and insufficient-context handling.
+- T09 — Foundry Local chat-model adapter.

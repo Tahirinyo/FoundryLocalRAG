@@ -23,3 +23,7 @@ class EmbeddingError(ApplicationError):
 
 class RetrievalError(ApplicationError):
     """Raised when persisted embeddings cannot be safely compared."""
+
+
+class PromptError(ApplicationError):
+    """Raised when grounded prompt preparation receives invalid input."""
