@@ -12,6 +12,7 @@
 
 - T07 — Retrieval and similarity.
 - T08 — Grounded prompt construction and insufficient-context handling.
+- T09 — Foundry Local chat-model adapter.
 
 ## In Progress
 
@@ -23,4 +24,4 @@
 
 ## Next
 
-- T09 — Foundry Local chat-model adapter.
+- T10 — End-to-end RAG answer orchestration.
