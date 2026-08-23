@@ -11,3 +11,7 @@ class ConfigurationError(ApplicationError):
 
 class DocumentError(ApplicationError):
     """Raised when a supported document cannot be read or processed."""
+
+
+class PersistenceError(ApplicationError):
+    """Raised when local persistence cannot safely complete."""
