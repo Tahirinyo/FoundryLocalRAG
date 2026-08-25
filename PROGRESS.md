@@ -17,6 +17,7 @@
 - T10 — End-to-end RAG answer orchestration.
 - T11 — Minimal CLI user experience.
 - T12 — Sample knowledge base and evaluation set.
+- T13 — Automated integration and regression validation.
 
 ## In Progress
 
@@ -31,4 +32,4 @@
 
 ## Next
 
-- T13 — Automated integration and regression validation.
+- T14 — Real-model and offline smoke validation.
