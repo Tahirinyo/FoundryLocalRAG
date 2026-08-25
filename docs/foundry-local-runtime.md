@@ -150,7 +150,7 @@ verified.
 Verification results:
 
 - T13 focused integration suite: 3 tests passed.
-- Full repository suite: 119 tests passed.
+- Full repository suite: 122 tests passed.
 - Temporary SQLite state: removed after inspection.
 - Final status: **REAL LOCAL MODEL SMOKE EXECUTED — ANSWER ACCEPTANCE NOT MET —
   OFFLINE STATUS NOT VERIFIED**.

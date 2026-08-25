@@ -23,6 +23,11 @@
   production models. Offline status remains not verified because reliable
   network isolation was unavailable.
 
+- T15 — README, demo scenario, and project closeout. Documentation now covers
+  setup, cached model requirements, CLI usage, architecture, grounding,
+  verification evidence, limitations, and a 2–3 minute demo flow. Offline
+  status remains not verified.
+
 ## In Progress
 
 - None.
@@ -33,4 +38,4 @@
 
 ## Next
 
-- T15 — Next approved task; not started.
+- None. T00–T15 are complete.
