@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "fallback_answer": "I don't know based on the retrieved documents.",
+  "source_root": "data/sample",
+  "source_expectations": {
+    "meaning": "expected_sources lists required supporting-evidence source filenames",
+    "match": "unordered_subset",
+    "additional_retrieved_sources_allowed": true,
+    "empty_populated_kb_meaning": "no supporting-evidence source is expected; it does not require an empty runtime source list"
+  },
+  "cases": [
+    {
+      "id": "answerable-greenhouse-hours",
+      "category": "answerable",
+      "question": "When is the Cedar Grove greenhouse open to visitors?",
+      "expected_behavior": "Answer Tuesday through Saturday from 9:00 a.m. to 4:30 p.m., and closed Sunday and Monday.",
+      "required_facts": ["The greenhouse opens at 9:00 a.m.", "The greenhouse closes at 4:30 p.m.", "It is open Tuesday through Saturday and closed Sunday and Monday."],
+      "expected_sources": ["greenhouse.txt"],
+      "fallback_required": false
+    },
+    {
+      "id": "answerable-workshop-equipment",
+      "category": "answerable",
+      "question": "Which tools does the Pine Street workshop provide for registered participants?",
+      "expected_behavior": "Name hand saws, clamps, and measuring tapes; do not claim that the workshop provides safety glasses.",
+      "required_facts": ["The workshop provides hand saws, clamps, and measuring tapes."],
+      "expected_sources": ["workshop.txt"],
+      "fallback_required": false
+    },
+    {
+      "id": "answerable-trail-distance",
+      "category": "answerable",
+      "question": "How long is the Willow Loop?",
+      "expected_behavior": "Answer that the fictional Willow Loop is three kilometers long.",
+      "required_facts": ["The Willow Loop is three kilometers."],
+      "expected_sources": ["trail-guide.txt"],
+      "fallback_required": false
+    },
+    {
+      "id": "answerable-trail-bicycle-rule",
+      "category": "answerable",
+      "question": "Where are bicycles allowed on the Willow Loop?",
+      "expected_behavior": "Answer that bicycles are allowed only on the yellow-marked section.",
+      "required_facts": ["Bicycles are allowed only on the yellow-marked section."],
+      "expected_sources": ["trail-guide.txt"],
+      "fallback_required": false
+    },
+    {
+      "id": "unanswerable-greenhouse-admission",
+      "category": "unanswerable",
+      "question": "How much does admission to the Cedar Grove greenhouse cost?",
+      "expected_behavior": "State that the sample documents do not provide an admission price and do not invent one.",
+      "required_facts": [],
+      "expected_sources": [],
+      "fallback_required": false
+    },
+    {
+      "id": "unanswerable-workshop-instructor",
+      "category": "unanswerable",
+      "question": "Who teaches the Pine Street woodworking session?",
+      "expected_behavior": "State that the sample documents do not identify an instructor.",
+      "required_facts": [],
+      "expected_sources": [],
+      "fallback_required": false
+    },
+    {
+      "id": "unanswerable-trail-weather",
+      "category": "unanswerable",
+      "question": "What will the weather be like on the Willow Loop tomorrow?",
+      "expected_behavior": "State that the sample documents contain no weather forecast and do not use outside information.",
+      "required_facts": [],
+      "expected_sources": [],
+      "fallback_required": false
+    },
+    {
+      "id": "edge-cross-source-safety",
+      "category": "edge",
+      "question": "What visitor conduct rules apply at the greenhouse, and what participant safety rules apply at the workshop?",
+      "expected_behavior": "Use both relevant sources: greenhouse visitors must stay on the marked walkway and not touch plants, while workshop participants must complete the safety briefing and return tools to labeled shelves. Do not merge these into one shared rule.",
+      "required_facts": ["Greenhouse visitors must stay on the marked walkway and not touch plants.", "Workshop participants must complete the safety briefing and return tools to labeled shelves."],
+      "expected_sources": ["greenhouse.txt", "workshop.txt"],
+      "fallback_required": false
+    },
+    {
+      "id": "edge-source-attribution",
+      "category": "edge",
+      "question": "What rule applies to dogs on the Willow Loop?",
+      "expected_behavior": "State that dogs must remain on a leash throughout the Willow Loop, and require trail-guide.txt to be present in the returned source metadata. The generated answer need not name the filename.",
+      "required_facts": ["Dogs must remain on a leash throughout the Willow Loop."],
+      "expected_sources": ["trail-guide.txt"],
+      "fallback_required": false
+    },
+    {
+      "id": "edge-empty-knowledge-base",
+      "category": "edge",
+      "question": "What are the greenhouse visitor hours?",
+      "expected_behavior": "When the database contains no persisted chunks, return the exact deterministic fallback without invoking chat.",
+      "required_facts": [],
+      "expected_sources": [],
+      "fallback_required": true
+    }
+  ]
+}
