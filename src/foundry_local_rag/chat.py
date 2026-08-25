@@ -150,6 +150,7 @@ def _create_foundry_runtime(model_id: str, model_cache_dir: Path) -> _ChatRuntim
             model.load()
             loaded_by_adapter = True
         client = model.get_chat_client()
+        client.settings.temperature = 0.0  # type: ignore[attr-defined]
         return _FoundryLocalRuntime(model, client, loaded_by_adapter)
     except ChatError as error:
         if loaded_by_adapter and model is not None:

@@ -19,6 +19,16 @@ def _response(content: object = "answer") -> object:
     )
 
 
+class RejectingTemperatureSettings:
+    @property
+    def temperature(self) -> None:
+        return None
+
+    @temperature.setter
+    def temperature(self, _value: float) -> None:
+        raise RuntimeError("temperature configuration failed")
+
+
 class FakeRuntime:
     def __init__(self) -> None:
         self.response: object = _response()
@@ -232,7 +242,13 @@ class FoundryRuntimeTests(unittest.TestCase):
 
     def test_exact_variant_is_initialized_loaded_completed_and_unloaded(self) -> None:
         client = Mock()
-        client.complete_chat.return_value = _response("answer")
+        client.settings = types.SimpleNamespace(temperature=None)
+
+        def complete(messages: list[dict[str, str]]) -> object:
+            self.assertEqual(client.settings.temperature, 0.0)
+            return _response("answer")
+
+        client.complete_chat.side_effect = complete
         model = Mock()
         model.id = CHAT_MODEL_ID
         model.is_cached = True
@@ -260,6 +276,7 @@ class FoundryRuntimeTests(unittest.TestCase):
         catalog.get_model_variant.assert_called_once_with(CHAT_MODEL_ID)
         model.load.assert_called_once_with()
         model.get_chat_client.assert_called_once_with()
+        self.assertEqual(client.settings.temperature, 0.0)
         client.complete_chat.assert_called_once_with(messages)
         model.unload.assert_called_once_with()
         client.stream_chat.assert_not_called()
@@ -342,6 +359,73 @@ class FoundryRuntimeTests(unittest.TestCase):
         self.assertIsInstance(caught.exception.__cause__, RuntimeError)
         model.load.assert_called_once_with()
         model.unload.assert_called_once_with()
+
+    def test_temperature_configuration_failure_unloads_adapter_owned_model(self) -> None:
+        client = Mock()
+        client.settings = RejectingTemperatureSettings()
+        model = Mock()
+        model.id = CHAT_MODEL_ID
+        model.is_cached = True
+        model.is_loaded = False
+        model.get_chat_client.return_value = client
+        sdk, _, _ = self.make_sdk(model=model)
+
+        with patch.dict("sys.modules", {"foundry_local_sdk": sdk}):
+            with self.assertRaises(ChatError) as caught:
+                _create_foundry_runtime(CHAT_MODEL_ID, Path.cwd() / "model-cache")
+
+        self.assertIsInstance(caught.exception.__cause__, RuntimeError)
+        self.assertEqual(str(caught.exception.__cause__), "temperature configuration failed")
+        model.load.assert_called_once_with()
+        model.get_chat_client.assert_called_once_with()
+        model.unload.assert_called_once_with()
+        client.complete_chat.assert_not_called()
+
+    def test_temperature_configuration_failure_does_not_unload_external_model(self) -> None:
+        client = Mock()
+        client.settings = RejectingTemperatureSettings()
+        model = Mock()
+        model.id = CHAT_MODEL_ID
+        model.is_cached = True
+        model.is_loaded = True
+        model.get_chat_client.return_value = client
+        sdk, _, _ = self.make_sdk(model=model)
+
+        with patch.dict("sys.modules", {"foundry_local_sdk": sdk}):
+            with self.assertRaises(ChatError) as caught:
+                _create_foundry_runtime(CHAT_MODEL_ID, Path.cwd() / "model-cache")
+
+        self.assertIsInstance(caught.exception.__cause__, RuntimeError)
+        model.load.assert_not_called()
+        model.unload.assert_not_called()
+        client.complete_chat.assert_not_called()
+
+    def test_temperature_and_compensating_unload_failures_are_both_observable(self) -> None:
+        client = Mock()
+        client.settings = RejectingTemperatureSettings()
+        model = Mock()
+        model.id = CHAT_MODEL_ID
+        model.is_cached = True
+        model.is_loaded = False
+        model.get_chat_client.return_value = client
+        model.unload.side_effect = RuntimeError("unload failed")
+        sdk, _, _ = self.make_sdk(model=model)
+        adapter = FoundryLocalChatAdapter(
+            _config(),
+            _runtime_factory=_create_foundry_runtime,
+        )
+
+        with patch.dict("sys.modules", {"foundry_local_sdk": sdk}):
+            with self.assertRaises(ChatError) as caught:
+                adapter.complete((PromptMessage("user", "question"),))
+
+        self.assertIn("temperature configuration failed", str(caught.exception))
+        self.assertIsInstance(caught.exception.__cause__, RuntimeError)
+        self.assertEqual(str(caught.exception.__cause__), "unload failed")
+        model.load.assert_called_once_with()
+        model.get_chat_client.assert_called_once_with()
+        model.unload.assert_called_once_with()
+        client.complete_chat.assert_not_called()
 
     def test_client_creation_and_compensating_unload_failures_are_both_observable(self) -> None:
         model = Mock()

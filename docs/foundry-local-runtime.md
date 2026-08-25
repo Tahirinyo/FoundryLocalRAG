@@ -110,6 +110,132 @@ proofs used CPU variants. This is not an inference blocker, but later work may
 separately evaluate acceleration if required. No Foundry Local CLI was present
 on `PATH`, and the Python SDK did not require it for these proofs.
 
+## T14 real-RAG smoke attempt
+
+Attempted on 2026-08-25 with the repository's supported Python 3.11.9 virtual
+environment and the installed `foundry-local-sdk-winml==1.2.4` runtime. The
+live SDK catalog reported exactly the configured embedding and chat variants
+as cached and initially unloaded:
+
+- `qwen3-embedding-0.6b-generic-cpu:1`
+- `qwen2.5-0.5b-instruct-generic-cpu:4`
+
+No model download, execution-provider installation, model substitution, or
+cloud fallback was used. The installed `foundry-local-rag` console entry point
+ingested `data/sample/greenhouse.txt` into an isolated temporary SQLite
+database and answered the T12 greenhouse-hours question through the real
+embedding, retrieval, prompting, and chat boundaries. Both CLI commands exited
+successfully. Database inspection found three `greenhouse.txt` chunks with
+1,024-dimensional embeddings, and the answer returned all three greenhouse
+chunks as source metadata.
+
+The generated answer was:
+
+> The Cedar Grove greenhouse opens to visitors at 9:00 a.m. and closes at
+> 4:30 p.m. from Tuesday through Saturday.
+
+This conveyed the opening days and hours but omitted the required fact that the
+greenhouse is closed on Sunday and Monday. The T14 real-answer acceptance
+criterion therefore was not met, even though the real application path and
+both configured models executed successfully.
+
+A controlled offline rerun was attempted by requesting temporary outbound
+Windows Firewall rules scoped to the repository virtual-environment Python and
+CLI executables. Windows rejected rule creation with system error 5 (`Access
+is denied`) before either rule was created. Cleanup confirmed that no T14
+firewall rule or temporary smoke database remained. Because the successful
+smoke ran while network access remained available, offline operation is not
+verified.
+
+Verification results:
+
+- T13 focused integration suite: 3 tests passed.
+- Full repository suite: 119 tests passed.
+- Temporary SQLite state: removed after inspection.
+- Final status: **REAL LOCAL MODEL SMOKE EXECUTED — ANSWER ACCEPTANCE NOT MET —
+  OFFLINE STATUS NOT VERIFIED**.
+
+### Focused trail-distance re-smoke
+
+One additional real-model smoke was run on 2026-08-25 with the canonical T12
+`answerable-trail-distance` case. The production CLI ingested only
+`data/sample/trail-guide.txt` into
+`C:\Users\cimeny\AppData\Local\Temp\FoundryLocalRAG-T14-trail-3b5c2590d9424b87bbdc32e655a7d96e\smoke.sqlite3`
+and asked `How long is the Willow Loop?`. The exact configured cached models
+and Python 3.11.9 environment were reused without download or substitution.
+
+Ingest and ask both exited successfully. Inspection found three persisted
+`trail-guide.txt` chunks, each with a 1,024-dimensional embedding. The returned
+source order was chunk 0, chunk 2, then chunk 1, all from `trail-guide.txt`.
+Chunk 0 contained the required evidence that the Willow Loop is a fictional
+three-kilometer trail and that a complete loop usually takes about one hour at
+an easy pace.
+
+The generated answer was:
+
+> The Willow Loop is a fictional three-kilometer walking trail that begins
+> beside the old stone bridge and ends at a point beyond the meadow sign. It's
+> considered a short distance for most people to walk, typically lasting
+> around 1-2 hours depending on factors such as weather conditions and personal
+> fitness level.
+
+The answer clearly conveyed the required three-kilometer fact, so that narrow
+semantic fact check passed. The answer was not fully grounded, however: the
+documents do not state that the trail ends beyond the meadow sign, and they say
+the loop usually takes about one hour rather than one to two hours based on
+weather or fitness. The overall grounded-answer acceptance criterion therefore
+remains unmet. With correct retrieval and intact prompt evidence, this second
+result strengthens the classification as real small-model output-quality
+behavior rather than an ingestion, persistence, retrieval, prompt,
+orchestration, or adapter defect.
+
+Postflight reported both configured models cached and unloaded, no normal
+application database, no remaining smoke directory, and no generated SQLite
+state. A cache snapshot found no added or removed asset paths or size changes;
+the existing `foundry.modelinfo.json` modification timestamp changed during
+the SDK lifecycle. Offline status remains not verified, and no further network
+isolation was attempted.
+
+Focused re-smoke status: **T14 REMAINS BLOCKED — REAL-MODEL ANSWER ACCEPTANCE
+NOT MET — OFFLINE STATUS NOT VERIFIED**.
+
+### Post-correction trail-distance smoke
+
+The single authorized post-correction smoke ran on 2026-08-25 after tightening
+the grounded system prompt and setting the chat client's temperature to `0.0`.
+Preflight confirmed that the exact configured embedding and chat variants were
+cached and initially unloaded. No model download, substitution, or cloud
+fallback was used.
+
+The production CLI ingested only `data/sample/trail-guide.txt` into
+`C:\Users\cimeny\AppData\Local\Temp\FoundryLocalRAG-T14-post-correction-de2fe12d0ac447f1a3ca81e33397e373\smoke.sqlite3`.
+Ingestion exited successfully and persisted the canonical source as three
+chunks with 1,024-dimensional embeddings. The production CLI then performed
+exactly one completion for `How long is the Willow Loop?`. Retrieved source
+order was chunk 0, chunk 2, then chunk 1, all from `trail-guide.txt`.
+
+The generated answer was:
+
+> The Willow Loop is a fictional three-kilometer walking trail that begins
+> beside the old stone bridge. It usually takes about one hour to walk.
+
+The answer included the required three-kilometer fact. Its additional factual
+claims—the fictional trail description, its start beside the old stone bridge,
+and the usual approximately one-hour duration—were all explicitly supported by
+retrieved chunk 0. The returned source metadata included `trail-guide.txt`, and
+no unsupported inference, estimate, extrapolation, or general-knowledge detail
+was present. Grounded-answer acceptance therefore passed.
+
+Both configured models were cached and unloaded after command completion. The
+temporary database and directory were removed, and `data/rag.sqlite3` was not
+created. The cache contained the same 23 paths and file sizes before and after
+the smoke; only the existing `foundry.modelinfo.json` modification timestamp
+changed during SDK lifecycle use. No network isolation was attempted, so the
+final T14 offline status remains **OFFLINE STATUS NOT VERIFIED**.
+
+Post-correction status: **T14 REAL-MODEL GROUNDED-ANSWER ACCEPTANCE PASSED —
+OFFLINE STATUS NOT VERIFIED**.
+
 ## Authoritative sources
 
 - [Get started with Foundry Local on Windows](https://learn.microsoft.com/en-us/windows/ai/foundry-local/get-started)

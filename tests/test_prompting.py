@@ -25,6 +25,16 @@ class PromptingTests(unittest.TestCase):
         self.assertEqual(result.messages[-1], PromptMessage("user", "What is the answer?"))
         self.assertEqual(result.messages[0].role, "system")
         self.assertIn("Answer only from", result.messages[0].content)
+        self.assertIn("directly and concisely", result.messages[0].content)
+        self.assertIn("facts explicitly stated", result.messages[0].content)
+        self.assertIn(
+            "Include all explicitly stated facts that directly answer",
+            result.messages[0].content,
+        )
+        self.assertIn("Do not infer, estimate, extrapolate", result.messages[0].content)
+        self.assertIn("factual details absent", result.messages[0].content)
+        self.assertIn("If only part of the requested answer is supported", result.messages[0].content)
+        self.assertIn("remaining information is not provided", result.messages[0].content)
         self.assertIn("untrusted", result.messages[0].content)
         self.assertEqual(result.messages[1].role, "user")
         context = self._context_json(result)

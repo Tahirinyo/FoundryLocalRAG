@@ -18,6 +18,10 @@
 - T11 — Minimal CLI user experience.
 - T12 — Sample knowledge base and evaluation set.
 - T13 — Automated integration and regression validation.
+- T14 — Real Foundry Local model smoke validation. The single post-correction
+  trail-distance run passed grounded-answer acceptance with the exact cached
+  production models. Offline status remains not verified because reliable
+  network isolation was unavailable.
 
 ## In Progress
 
@@ -25,11 +29,8 @@
 
 ## Blocked
 
-- The validated Python 3.11 launcher could not start during T11 verification
-  because access to the WindowsApps interpreter was denied. The focused and
-  full test suites passed with the available Python 3.14.2 interpreter; this
-  does not establish Python 3.14 or offline Foundry Local runtime support.
+- None.
 
 ## Next
 
-- T14 — Real-model and offline smoke validation.
+- T15 — Next approved task; not started.
