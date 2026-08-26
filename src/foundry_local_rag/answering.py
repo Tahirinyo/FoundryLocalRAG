@@ -10,7 +10,6 @@ from .embeddings import FoundryLocalEmbeddingAdapter
 from .prompting import GroundedPrompt, InsufficientContext, prepare_grounded_prompt
 from .retrieval import RetrievedChunk, retrieve_chunks
 
-# T10 uses a fixed retrieval count; configuration is intentionally deferred.
 TOP_K = 3
 
 

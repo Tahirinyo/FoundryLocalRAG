@@ -185,21 +185,27 @@ def _create_foundry_runtime(model_id: str, model_cache_dir: Path) -> _EmbeddingR
             loaded_by_adapter = True
         client = model.get_embedding_client()
         return _FoundryLocalRuntime(model, client, loaded_by_adapter)
-    except EmbeddingError:
+    except EmbeddingError as error:
         if loaded_by_adapter and model is not None:
-            _try_unload(model)
+            _unload_after_initialization_failure(model, error)
         raise
     except Exception as error:
         if loaded_by_adapter and model is not None:
-            _try_unload(model)
+            _unload_after_initialization_failure(model, error)
         raise EmbeddingError("Unable to initialize Foundry Local embedding model") from error
 
 
-def _try_unload(model: object) -> None:
+def _unload_after_initialization_failure(
+    model: object,
+    initialization_error: Exception,
+) -> None:
     try:
         model.unload()  # type: ignore[attr-defined]
-    except Exception:
-        pass
+    except Exception as cleanup_error:
+        raise EmbeddingError(
+            "Unable to unload embedding model after initialization failure: "
+            f"{initialization_error}"
+        ) from cleanup_error
 
 
 def _validate_text(text: object) -> None:

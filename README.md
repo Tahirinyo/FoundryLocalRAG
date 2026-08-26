@@ -53,6 +53,42 @@ The application expects these exact cached model variants:
 
 On a new machine, make these model assets available through the Foundry Local SDK/catalog before running the application. Initial model acquisition may require network access. The application uses the repository-local `model-cache\` directory by default, checks that each model is already cached, and does not download missing models during normal execution. If a required model is unavailable, the command fails instead of silently substituting another model or using a cloud service.
 
+From the repository root, run this one-time acquisition step while network access is available:
+
+```powershell
+@'
+from pathlib import Path
+
+from foundry_local_sdk import Configuration, FoundryLocalManager
+
+cache_dir = Path("model-cache").resolve()
+FoundryLocalManager.initialize(
+    Configuration(
+        app_name="foundry_local_rag_setup",
+        model_cache_dir=str(cache_dir),
+    )
+)
+manager = FoundryLocalManager.instance
+if manager is None:
+    raise RuntimeError("Foundry Local SDK did not initialize")
+
+model_ids = (
+    "qwen3-embedding-0.6b-generic-cpu:1",
+    "qwen2.5-0.5b-instruct-generic-cpu:4",
+)
+for model_id in model_ids:
+    model = manager.catalog.get_model_variant(model_id)
+    if model is None:
+        raise RuntimeError(f"Model variant is unavailable: {model_id}")
+    if not model.is_cached:
+        print(f"Downloading {model_id}...")
+        model.download()
+    print(f"Cached: {model_id}")
+'@ | .\.venv\Scripts\python.exe -
+```
+
+This setup command is the only documented model-download step. After both variants report `Cached`, normal `ingest` and `ask` commands use the local cache and never request a model download. Fully network-isolated execution has not been verified.
+
 See [`docs/foundry-local-runtime.md`](docs/foundry-local-runtime.md) for the verified runtime details and model evidence. The official Foundry Local setup documentation is also listed there.
 
 ## Usage
@@ -108,7 +144,7 @@ The review-friendly evaluation cases are in [`evaluation.md`](data/sample/evalua
 
 ### Automated tests
 
-The latest accepted prior validation reported the full repository suite passed **122 tests**. T13 included **3 focused integration tests**. The suite covers deterministic text processing, persistence, retrieval, prompting, answer orchestration, CLI behavior, model boundaries, and empty-knowledge-base handling with deterministic test doubles. This was not rerun during T15.
+The full repository suite passes **123 tests**, including **3 focused integration tests**. The suite covers deterministic text processing, persistence, retrieval, prompting, answer orchestration, CLI behavior, model boundaries, and empty-knowledge-base handling with deterministic test doubles.
 
 ### Real Foundry Local model smoke
 
@@ -131,33 +167,6 @@ Initial model acquisition required network access. The documented Windows networ
 - There is no cloud fallback by design.
 - Grounding instructions and the tested post-correction case provide safeguards, but they do not establish perfect grounding for all model outputs.
 - Offline operation remains unverified as described above.
-
-## 2–3 minute demo
-
-Use the cached models and prepare the sample document before recording. The demo should not depend on downloading a model, network access, retries, or a second question.
-
-1. **0:00–0:20 — Introduce the project.** Show the repository and explain that it is a local document Q&A assistant. Point out that Foundry Local supplies both embedding and chat inference.
-2. **0:20–0:45 — Explain the flow.** Show the two flows in [How it works](#how-it-works), mentioning SQLite persistence and returned source metadata.
-3. **0:45–1:10 — Ingest a document.** Run:
-
-   ```powershell
-   foundry-local-rag ingest data/sample/trail-guide.txt
-   ```
-
-   Explain that the text is chunked, embedded locally, and stored in `data/rag.sqlite3`.
-
-4. **1:10–1:55 — Ask the reliable question.** Run:
-
-   ```powershell
-   foundry-local-rag ask "How long is the Willow Loop?"
-   ```
-
-   Highlight the three-kilometer fact and the returned `trail-guide.txt` source. This is the same production path used by the post-correction T14 smoke, whose narrow grounded-answer check passed.
-
-5. **1:55–2:20 — Explain grounding.** Retrieved text is supplied as untrusted reference data. The prompt prohibits unsupported inference and general-knowledge additions, while sources are printed separately.
-6. **2:20–2:50 — Close with evidence and limitations.** Mention the 122 tests from the accepted prior validation and the real-model smoke. State that offline status was not verified, and briefly note the small model and small-dataset/brute-force retrieval limitations.
-
-The demo demonstrates local inference and grounded source-aware answering; it does not claim complete offline verification.
 
 ## Further reading
 

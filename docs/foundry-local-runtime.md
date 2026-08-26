@@ -1,8 +1,10 @@
 # Foundry Local runtime compatibility evidence
 
-Verified on 2026-08-22 for T01. This records runtime compatibility and two
-minimal local inference proofs only; it does not establish application or RAG
-behavior.
+This document records T01 runtime and model compatibility evidence from
+2026-08-22, including two minimal local inference proofs, and later T14 real
+application/RAG smoke evidence from 2026-08-25. The T01 proofs alone do not
+establish application behavior. The T14 evidence covers only the documented
+scenarios, and fully offline execution remains unverified.
 
 ## Target environment
 
@@ -159,10 +161,10 @@ Verification results:
 
 One additional real-model smoke was run on 2026-08-25 with the canonical T12
 `answerable-trail-distance` case. The production CLI ingested only
-`data/sample/trail-guide.txt` into
-`C:\Users\cimeny\AppData\Local\Temp\FoundryLocalRAG-T14-trail-3b5c2590d9424b87bbdc32e655a7d96e\smoke.sqlite3`
-and asked `How long is the Willow Loop?`. The exact configured cached models
-and Python 3.11.9 environment were reused without download or substitution.
+`data/sample/trail-guide.txt` into an isolated `smoke.sqlite3` database under a
+temporary `%TEMP%\FoundryLocalRAG-T14-trail-*\` directory and asked `How long
+is the Willow Loop?`. The exact configured cached models and Python 3.11.9
+environment were reused without download or substitution.
 
 Ingest and ask both exited successfully. Inspection found three persisted
 `trail-guide.txt` chunks, each with a 1,024-dimensional embedding. The returned
@@ -207,8 +209,9 @@ Preflight confirmed that the exact configured embedding and chat variants were
 cached and initially unloaded. No model download, substitution, or cloud
 fallback was used.
 
-The production CLI ingested only `data/sample/trail-guide.txt` into
-`C:\Users\cimeny\AppData\Local\Temp\FoundryLocalRAG-T14-post-correction-de2fe12d0ac447f1a3ca81e33397e373\smoke.sqlite3`.
+The production CLI ingested only `data/sample/trail-guide.txt` into an isolated
+`smoke.sqlite3` database under a temporary
+`%TEMP%\FoundryLocalRAG-T14-post-correction-*\` directory.
 Ingestion exited successfully and persisted the canonical source as three
 chunks with 1,024-dimensional embeddings. The production CLI then performed
 exactly one completion for `How long is the Willow Loop?`. Retrieved source

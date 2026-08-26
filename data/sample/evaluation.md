@@ -1,7 +1,8 @@
 # Sample evaluation set
 
 These cases use the three fictional `.txt` documents in this directory. They
-are intended for later T13 automated tests and T14 real-model validation.
+are part of the completed automated integration and real-model validation
+workflow.
 
 Expected behavior describes required facts and source files rather than exact
 answer wording. Runtime source identifiers are canonical absolute paths; the

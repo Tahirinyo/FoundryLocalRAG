@@ -370,6 +370,30 @@ class FoundryRuntimeTests(unittest.TestCase):
         model.load.assert_called_once_with()
         model.unload.assert_called_once_with()
 
+    def test_client_creation_and_compensating_unload_failures_are_both_observable(self) -> None:
+        model = Mock()
+        model.id = EMBEDDING_MODEL_ID
+        model.is_cached = True
+        model.is_loaded = False
+        model.get_embedding_client.side_effect = RuntimeError("client failed")
+        model.unload.side_effect = RuntimeError("unload failed")
+        sdk, _, _ = self.make_sdk(model=model)
+        adapter = FoundryLocalEmbeddingAdapter(
+            _config(),
+            _runtime_factory=_create_foundry_runtime,
+        )
+
+        with patch.dict("sys.modules", {"foundry_local_sdk": sdk}):
+            with self.assertRaises(EmbeddingError) as caught:
+                adapter.embed_text("text")
+
+        self.assertIn("client failed", str(caught.exception))
+        self.assertIsInstance(caught.exception.__cause__, RuntimeError)
+        self.assertEqual(str(caught.exception.__cause__), "unload failed")
+        model.load.assert_called_once_with()
+        model.get_embedding_client.assert_called_once_with()
+        model.unload.assert_called_once_with()
+
     def test_owned_model_unload_failure_can_be_retried(self) -> None:
         model = Mock()
         model.id = EMBEDDING_MODEL_ID
